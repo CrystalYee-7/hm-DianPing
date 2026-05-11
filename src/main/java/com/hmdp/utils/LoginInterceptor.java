@@ -17,45 +17,14 @@ import static com.hmdp.utils.RedisConstants.LOGIN_USER_TTL;
 
 public class LoginInterceptor implements HandlerInterceptor {
 
-    private StringRedisTemplate stringRedisTemplate;
-
-    public LoginInterceptor(StringRedisTemplate stringRedisTemplate) {
-        this.stringRedisTemplate = stringRedisTemplate;
-    }
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        //1.获取请求头中的token
-        String token = request.getHeader("authorization");
-        if (StrUtil.isBlank(token)) {
-            // 不存在，拦截，返回401状态码
+        // 1. 判断是否需要拦截（ThreadLocal中是否有用户）
+        if (UserHolder.getUser() == null) {
+            // 没有，需要拦截，跳转到登录页
             response.setStatus(401);
             return false;
         }
-        //2.基于token获取redis中的用户
-        String key = LOGIN_USER_KEY + token;
-        Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(key);
-        //3.判断用户是否存在
-        if(userMap.isEmpty()){
-            //4.不存在，拦截，返回401状态码
-            response.setStatus(401);
-            return false;
-        }
-        // 5. 将查询到的 Hash 数据转换为 UserDTO 对象
-        UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap, new UserDTO(), false);
-
-        // 6. 存在，保存用户信息到Threadlocal
-        UserHolder.saveUser(userDTO);
-
-        // 7. 刷新 token 有效期
-        stringRedisTemplate.expire(key, LOGIN_USER_TTL, TimeUnit.MINUTES);
-
-        // 8. 放行
         return true;
-    }
-
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
     }
 }
