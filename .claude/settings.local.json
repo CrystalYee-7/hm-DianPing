@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn compile *)"
+      "Bash(mvn compile *)",
+      "Bash(mvn clean *)",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(javap -verbose -cp target/classes com.hmdp.dto.Result)",
+      "Bash(\"D:\\\\WorkSpace\\\\IDE\\\\Java\\\\jdk17\\\\bin\\\\javap\" -verbose -cp \"D:\\\\桌面\\\\Code\\\\hmdp\\\\hm-dianping\\\\target\\\\classes\" com.hmdp.dto.Result)"
     ]
   }
 }
